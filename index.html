@@ -37,7 +37,7 @@
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "PATCHVIET",
-    "url": "https://patchviet.com",
+    "url": "https://patchviet.online,
     "description": "Kho Việt hóa game PC miễn phí lớn nhất Việt Nam",
     "potentialAction": {
       "@type": "SearchAction",
@@ -509,7 +509,7 @@ const CONFIG = {
   sliderAutoplay: 5000
 };
 
-// ========== DATA: GAMES PAWNDY ==========
+// ========== DATA: GAMES https://discord.gg/j2fkKpt2DDY ==========
 // HƯỚNG DẪN THÊM GAME (copy block mẫu, chỉ cần điền các field bắt buộc):
 // BẮT BUỘC: slug, title, cover, status, size, vietVersion, updateDate, downloadLink, description
 // KHUYẾN NGHỊ: genre[], category[], platforms[], developer, version, releaseDate
@@ -533,6 +533,50 @@ const CONFIG = {
 //   downloadLink: "https://..."
 // },
 const GAMES = [
+   {
+    slug: "photomaly",
+    title: "Photomaly Việt Hóa",
+    cover: "https://cdn.phototourl.com/free/2026-08-06-58de122a-8710-4b90-aaca-7e89f18a20d5.jpg",
+    banner: "https://cdn.phototourl.com/free/2026-08-06-58de122a-8710-4b90-aaca-7e89f18a20d5.jpg",
+    genre: ["Horror", "Indie"],
+    status: "100%",
+    hasVoice: false,
+    hasDLC: true,
+    size: " 39 MB",
+    version: "1.0",
+    vietVersion: "v1.0",
+    updateDate: "2026-08-06",
+    releaseDate: "2026-08-06",
+    developer: "Bun Muen",
+    engine: "Proprietary",
+    language: "Tiếng Việt (Phụ đề)",
+    platforms: ["steam", "epic"],
+    downloads: 1222,
+    views: 11890,
+    category: ["indie"],
+    description: "Hành trình làm nhân viên chụp ảnh thẻ lấy ngay với bản dịch tiếng Việt đầy đủ. Photomaly đã được Việt hóa 100%.",
+    downloadLink: "https://link4m.net/UqK7SIN",
+    youtube: "https://www.youtube.com/embed/gR8iwYZvdX0",
+    screenshots: [
+      "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/4286120/601bc47d5e3f43ec5f5aff46a8c3a294a6367d79/ss_601bc47d5e3f43ec5f5aff46a8c3a294a6367d79.1920x1080.jpg?t=1785764223",
+      "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/4286120/b98f1d184142135ff201452aa7f6b9be144cba93/ss_b98f1d184142135ff201452aa7f6b9be144cba93.1920x1080.jpg?t=1785764223",
+      "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/4286120/1cca9d8fdb019fcf0fcd13ae7e42fefc5734f7a1/ss_1cca9d8fdb019fcf0fcd13ae7e42fefc5734f7a1.1920x1080.jpg?t=1785764223",
+      "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/4286120/2360ad09927bd4ac540331f70953c2c197770c46/ss_2360ad09927bd4ac540331f70953c2c197770c46.1920x1080.jpg?t=1785764223"
+    ],
+   requirements: {
+    min: { os: "Windows 10", cpu: "Intel Core i5-6500", ram: "8 GB", gpu: "GTX 1050 Ti", storage: "2 GB" },
+    rec: { os: "Windows 10/11", cpu: "Intel Core i5-", ram: "16 GB", gpu: "GTX 1660", storage: "2 GB SSD" }
+},
+    installGuide: "1. Tải patch Việt hóa.\n2. Giải nén và chạy .exe dán đường dẫn game.\n3. Chạy game qua Steam / Epic.",
+    changelog: [
+      { ver: "v1.4.2", date: "03-08-2026", note: "Việt hóa đầy đủ Photomaly + sửa lỗi font." },
+      { ver: "v1.3.0", date: "15-05-2026", note: "Cập nhật theo bản 1.0, sửa hội thoại bị thiếu." }
+    ],
+    faq: [
+      { q: "Có hỗ trợ voice tiếng Việt không?", a: "Hiện tại chỉ có phụ đề tiếng Việt. Voice vẫn giữ nguyên tiếng Anh." },
+      { q: "Có bị VAC ban không?", a: "Patch chỉ thay text, không đụng offline/online anti-cheat. An toàn khi chơi offline." }
+    ]
+  },
   {
     slug: "shift-at-midnight",
     title: "Shift At Midnight Việt Hóa",
