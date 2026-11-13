@@ -456,6 +456,12 @@ function animateNumber(el, from, to, duration = 700) {
 /* ROUTER */
 function parseHash() {
   const raw = (location.hash || '#/').replace(/^#/, '');
+  
+  // Bắt sự kiện link reset pass từ email
+  if (raw.includes('access_token=') || raw.includes('type=recovery')) {
+    return { seg: ['reset-redirect'], query: {}, path: 'reset-redirect' };
+  }
+
   const [pathPart, queryPart] = raw.split('?');
   const seg = pathPart.split('/').filter(Boolean);
   const query = {};
@@ -465,6 +471,9 @@ function parseHash() {
 function router() {
   const { seg, query } = route;
   const [a, b, c] = seg;
+  
+  if (a === 'reset-redirect') return { html: '<div class="wrap narrow center" style="padding:100px 20px"><h2>Đang xác thực...</h2><p class="muted">Vui lòng đợi trong giây lát.</p></div>', title: 'Đang xác thực' };
+
   if (!a) return homeView();
   switch (a) {
     case 'explore': return exploreView(query);
@@ -480,6 +489,7 @@ function router() {
     case 'login': return loginView();
     case 'register': return registerView();
     case 'forgot': return forgotView();
+    case 'update-password': return updatePasswordView(); // Thêm route này
     case 'orders': return ordersView();
     case 'transactions': return walletTxView({ ...query });
     case 'notifications': return notificationsView();
@@ -1122,6 +1132,21 @@ function forgotView() {
     </form>
     <p class="small center mt"><a href="#/login">← Về đăng nhập</a></p>
   </div>`, title: 'Quên mật khẩu' };
+}
+
+// Thêm giao diện nhập mật khẩu mới
+function updatePasswordView() {
+  return { html: `<div class="wrap narrow" style="padding:44px 20px 70px">
+    <div class="center mb">
+      <h1 style="font-size:1.6rem;margin:0">Cập nhật mật khẩu mới</h1>
+      <p class="muted small">Vui lòng nhập mật khẩu mới cho tài khoản của bạn.</p>
+    </div>
+    <form data-form="update-password" class="form-box">
+      <label class="field"><span>Mật khẩu mới *</span><input type="password" name="password" required minlength="8"></label>
+      <label class="field"><span>Nhập lại mật khẩu *</span><input type="password" name="confirm" required minlength="8"></label>
+      <button class="btn primary block" type="submit">${icon('check')} Cập nhật mật khẩu</button>
+    </form>
+  </div>`, title: 'Cập nhật mật khẩu' };
 }
 
 /* ORDERS */
@@ -2110,7 +2135,7 @@ async function handleForm(name, form) {
       return;
     }
 
-        case 'login': {
+    case 'login': {
       const identifier = val('identifier');
       const pw = val('password');
       try {
@@ -2221,6 +2246,23 @@ async function handleForm(name, form) {
         toast('Đã gửi email đặt lại.', 'ok');
         location.hash = '#/login';
       } catch (e) { toast(e.message || 'Không gửi được.', 'error'); }
+      return;
+    }
+
+    case 'update-password': {
+      const pw = val('password');
+      const confirm = val('confirm');
+      if (pw.length < 8 || !/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw)) return toast('Mật khẩu ≥8 ký tự, gồm chữ và số.', 'error');
+      if (pw !== confirm) return toast('Mật khẩu không khớp.', 'error');
+      try {
+        const { error } = await supabase.auth.updateUser({ password: pw });
+        if (error) throw error;
+        toast('Cập nhật mật khẩu thành công! Vui lòng đăng nhập lại.', 'ok');
+        await signOut();
+        location.hash = '#/login';
+      } catch (e) {
+        toast(e.message || 'Có lỗi xảy ra.', 'error');
+      }
       return;
     }
 
@@ -2524,26 +2566,48 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 /* BOOT */
 (async function boot() {
   try {
-    const { data: { session: sbSession } } = await supabase.auth.getSession();
-    if (sbSession) session = { userId: sbSession.user.id };
+    // Nếu đây là link reset pass, không làm gì cả để onAuthStateChange xử lý
+    if (location.hash.includes('access_token=') || location.hash.includes('type=recovery')) {
+      // Tạm thời render một màn hình chờ
+      $('#app').innerHTML = '<div class="wrap narrow center" style="padding:100px 20px"><h2>Đang xác thực...</h2><p class="muted">Vui lòng đợi trong giây lát.</p></div>';
+    } else {
+      const { data: { session: sbSession } } = await supabase.auth.getSession();
+      if (sbSession) session = { userId: sbSession.user.id };
 
-    await loadAll();
+      await loadAll();
 
-    setupRealtime(async (table) => {
-      switch (table) {
-        case 'sheets': await loadSheets(); break;
-        case 'wallet_accounts': await loadWallet(); if (isAdmin()) await loadAllWalletAccounts(); break;
-        case 'wallet_transactions': await loadWalletTransactions(); break;
-        case 'notifications': await loadNotifications(); break;
-        case 'topup_requests': await loadTopupRequests(); break;
-        case 'withdrawal_requests': await loadWithdrawalRequests(); break;
-        case 'orders': await loadOrders(); await loadPurchases(); break;
-        case 'seller_earnings': await loadSellerEarnings(); break;
+      setupRealtime(async (table) => {
+        switch (table) {
+          case 'sheets': await loadSheets(); break;
+          case 'wallet_accounts': await loadWallet(); if (isAdmin()) await loadAllWalletAccounts(); break;
+          case 'wallet_transactions': await loadWalletTransactions(); break;
+          case 'notifications': await loadNotifications(); break;
+          case 'topup_requests': await loadTopupRequests(); break;
+          case 'withdrawal_requests': await loadWithdrawalRequests(); break;
+          case 'orders': await loadOrders(); await loadPurchases(); break;
+          case 'seller_earnings': await loadSellerEarnings(); break;
+        }
+        realtimeRender();
+      });
+
+      if (cache.profile?.role === 'admin') {
+        await loadAdminLogs();
+        await loadReports();
+        await loadAllWalletAccounts();
       }
-      realtimeRender();
-    });
 
+      render();
+    }
+
+    // Bắt sự kiện chuyển hướng từ email
     supabase.auth.onAuthStateChange(async (event, sbSession) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        // Khi click link, Supabase nhận diện được token và kích hoạt event này
+        location.hash = '#/update-password';
+        render();
+        return;
+      }
+
       if (['SIGNED_IN','SIGNED_OUT','USER_UPDATED','TOKEN_REFRESHED'].includes(event)) {
         session = sbSession ? { userId: sbSession.user.id } : null;
         if (sbSession) {
@@ -2562,13 +2626,6 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
       }
     });
 
-    if (cache.profile?.role === 'admin') {
-      await loadAdminLogs();
-      await loadReports();
-      await loadAllWalletAccounts();
-    }
-
-    render();
   } catch (e) {
     console.error('Boot error:', e);
     document.body.insertAdjacentHTML('afterbegin',
